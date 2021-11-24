@@ -1,1 +1,2 @@
-# Project_CS330_tcp
+# Project CS330 Tcp client server communication 
+.........
