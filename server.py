@@ -148,7 +148,7 @@ class server(object):
 
             Returns:
             message (String) : return the received message form client
-            
+                
         """
         full_message = ''
         new_msg = True
