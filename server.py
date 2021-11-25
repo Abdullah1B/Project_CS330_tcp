@@ -104,4 +104,5 @@ class server(object):
         
 
 Server = server("",4041)
+e = 3
 Server.Start()
