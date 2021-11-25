@@ -122,6 +122,5 @@ class client(object):
 
 
 if __name__ == "__main__":
-    e = 0
     Client = client("192.168.1.8", 4041)
     Client.start()
