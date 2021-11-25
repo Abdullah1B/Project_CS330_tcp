@@ -123,7 +123,7 @@ class client(object):
 
 if __name__ == "__main__":
     
-    Client = client("192.168.1.8", 4041)
+    Client = client("put th ip of the server", 4041)
     Client.start()
 
 
