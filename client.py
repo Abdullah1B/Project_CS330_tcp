@@ -168,8 +168,8 @@ class client(object):
             message (String)    :  the message that want to send to the client  
 
             Returns:
-            None
-                                                        
+            None     
+
         """
         message2 = str(message)
         message2 = f'{len(message2):<{HEADERSIZE}}' + message2
