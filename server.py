@@ -7,8 +7,6 @@ FORMAT = "utf-8"
 HEADERSIZE = 64
 key = "f4Uo9jGxFpMMXokg0Bap6zV-3RgGlz9CPEmtsY72D6c="
 SECRET_KEY = Fernet(key)
-
-
 ENDC = '\033[0m'
 BOLD = '\033[1m'
 UNDERLINE = '\033[5m'
@@ -19,8 +17,20 @@ class server(object):
         self.port = port
        
     
-        
+    
     def handle_client(self,client,address):
+        """
+            handle exchange message between client and server 
+
+
+            Parameters:
+            client (Socket) :  the client socket which used to send and receive data
+            address (list)  :  the address which have the IP of client and port nubmer
+
+            Returns:
+             None
+
+        """
         input_key = client.recv(512)
         input_key = input_key.decode()
         
@@ -50,6 +60,17 @@ class server(object):
         client.close()
 
     def receive_encrypted_msg(self,client,address):
+        """
+           Receiving Encrypted message and decrypt the message 
+
+            Parameters:
+            client (Socket) :  the client socket which used to send and receive data
+            address (list)  :  the address which have the IP of client and port nubmer
+
+            Returns:
+            list: return a list contains on Encrypted message and decrypted message 
+
+        """
         encrypted_msg = self.receive_data(client=client, address= address)
         decrypted_msg = SECRET_KEY.decrypt(
             bytes(encrypted_msg[1:len(encrypted_msg)], FORMAT)).decode()
@@ -57,11 +78,33 @@ class server(object):
     
 
     def send_encrypted_msg(self,client,address, msg:str):
+        """
+           Sending Encrypted message to the client  
+
+            Parameters:
+            client (Socket) :  the client socket which used to send and receive data
+            address (list)  :  the address which have the IP of client and port nubmer
+            msg (String)    :  the message that want to send to the client  
+
+            Returns:
+            None
+
+        """
         encrypted_msg = SECRET_KEY.encrypt(msg.encode(FORMAT))
         self.send_data(client= client, address= address , msg= encrypted_msg)
     
         
     def Start(self):
+        """
+            setup the socket and bind it to IP address and Port Number and start to listening to the client 
+            and setup the threding to hold multiple connection at the same time
+
+            Parameters:
+            None
+
+            Returns:
+            None
+        """
         self.server_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_Socket.bind((self.HostIP, self.port))
         self.server_Socket.listen()
@@ -75,8 +118,20 @@ class server(object):
             
     
     def send_data(self,client,address,msg):
+        """
+           Sending message from server to the client  
+
+            Parameters:
+            client (Socket) :  the client socket which used to send and receive data
+            address (list)  :  the address which have the IP of client and port nubmer
+            msg (String)    :  the message that want to send to the client  
+
+            Returns:
+            None
+
+        """
         message = str(msg)
-        message = f'{len(message):<{HEADERSIZE}}' + message
+        message = f'{len(message):<{HEADERSIZE}}' + message # add the HEADERSIZE to the message
         print(f"{Fore.YELLOW + BOLD}[SENDING]send a message to {address[0]} : {msg}{ENDC}\n")
         client.send(message.encode(FORMAT))
 
@@ -84,6 +139,17 @@ class server(object):
                
                 
     def receive_data(self,client,address):
+        """
+          receiving message from Client to the server and buffer the received data in proper way
+
+            Parameters:
+            client (Socket) :  the client socket which used to send and receive data
+            address (list)  :  the address which have the IP of client and port nubmer
+
+            Returns:
+            message (String) : return the received message form client
+
+        """
         full_message = ''
         new_msg = True
         while True:
@@ -101,7 +167,6 @@ class server(object):
                 full_message = ''
                 return message
                 
-        
 
 Server = server("",4041)
 Server.Start()
