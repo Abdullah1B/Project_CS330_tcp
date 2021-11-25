@@ -1,112 +1,107 @@
 import socket
 from cryptography.fernet import Fernet
-from colorama import init 
+from colorama import init , Fore
+import threading
 init(convert=True)
+FORMAT = "utf-8"
+HEADERSIZE = 64
+key = "f4Uo9jGxFpMMXokg0Bap6zV-3RgGlz9CPEmtsY72D6c="
+SECRET_KEY = Fernet(key)
 
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    FAIL = '\033[91m'
-    BGRED = '\033[41m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[5m'
+
+ENDC = '\033[0m'
+BOLD = '\033[1m'
+UNDERLINE = '\033[5m'
 
 class server(object):
     def __init__(self,HostIP,port):
         self.HostIP = HostIP
         self.port = port
-        self.HEADER = 64
-        self.FORMAT = 'utf-8'
-        self.address = ""
-        self.key = None
+       
+    
         
-    def handle_client(self,client):
+    def handle_client(self,client,address):
         input_key = client.recv(512)
         input_key = input_key.decode()
         
         connection = True
         while connection:
             if input_key == "Open_mode":
-                msg  = self.receive_data(client)
-                self.send_data(client,msg.upper())
+                msg  = self.receive_data(client= client, address= address)
+                self.send_data(client= client, address= address, msg= msg.upper())
 
             elif input_key == "Secure_mode":
-                Secrt_key = client.recv(2024)
-                Secrt_key = Secrt_key.decode()
-                self.key = Fernet(Secrt_key)# shared key to encrypt and decrypt message
+              
+                encrypted_msg= self.receive_encrypted_msg(client= client, address= address)                
+                print(f"encrypted message: {Fore.LIGHTRED_EX + BOLD}{encrypted_msg[0]}{ENDC}\n")
+                print(f"Decrypted message: {Fore.GREEN + BOLD}{encrypted_msg[1]}{ENDC}\n")
 
-                msg  = self.receive_data(client)
-                msg2 = self.Decrypt(self.convert_to_bytes(msg))
-                print(f"encrypted message: {bcolors.OKGREEN +bcolors.BOLD}{msg}{bcolors.ENDC}")
-                print(f"Decrypted message: {bcolors.OKGREEN +bcolors.BOLD}{msg2}{bcolors.ENDC}")
-
-                encrypted_msg = self.encrypt(msg2.upper())
-                self.send_data(client,encrypted_msg)
+                self.send_encrypted_msg(client= client, address= address, msg= str(encrypted_msg[1]).upper())
 
 
                 
             elif input_key == "Quit_application":
-                msg  = self.receive_data(client)
-                self.send_data(client, msg.upper())
+                msg  = self.receive_data(client= client , address= address)
+                self.send_data(client= client,address= address,msg= f"DISCONNECTED from {address[0]} ".upper())
                 connection = False
 
             input_key = client.recv(512)
             input_key = input_key.decode()
         client.close()
 
-    def encrypt(self,msg):
-        return self.key.encrypt(msg.encode(self.FORMAT))
-           
-    def convert_to_bytes(self,msg):
-        return bytes(msg[1:len(msg)],self.FORMAT)    
+    def receive_encrypted_msg(self,client,address):
+        encrypted_msg = self.receive_data(client=client, address= address)
+        decrypted_msg = SECRET_KEY.decrypt(
+            bytes(encrypted_msg[1:len(encrypted_msg)], FORMAT)).decode()
+        return (encrypted_msg, decrypted_msg)
+    
 
-    def Decrypt(self,msg):
-        return self.key.decrypt(msg).decode()
+    def send_encrypted_msg(self,client,address, msg:str):
+        encrypted_msg = SECRET_KEY.encrypt(msg.encode(FORMAT))
+        self.send_data(client= client, address= address , msg= encrypted_msg)
+    
         
-    def start(self):
+    def Start(self):
         self.server_Socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_Socket.bind((self.HostIP, self.port))
         self.server_Socket.listen()
         
-        print(f"{bcolors.OKGREEN+ bcolors.BOLD}[LISTENING] Server Start to listening\n{bcolors.ENDC}")
+        print(f"{UNDERLINE + BOLD}[LISTENING] Server Start to listening\n{ENDC}")
         while True:
             client , address = self.server_Socket.accept()
-            print(f"{bcolors.BOLD}{bcolors.OKGREEN}[CONNECTION] connection establish {address[0]}:{address[1]}{bcolors.ENDC}\n")
-            self.address = address[0]
-            self.handle_client(client)
+            print(f"{BOLD + Fore.GREEN}[CONNECTION] connection establish {address[0]}:{address[1]}{ENDC}\n")
+            thread = threading.Thread(target= self.handle_client,args= (client,address))
+            thread.start()
             
     
-    def send_data(self,client,data):
-        message = str(data)
-        message = f'{len(message):<{self.HEADER}}' + message
-        print(f"{bcolors.YELLOW + bcolors.BOLD}[SENDING]send a message to {self.address} : {data}\n")
-        client.send(message.encode(self.FORMAT))
+    def send_data(self,client,address,msg):
+        message = str(msg)
+        message = f'{len(message):<{HEADERSIZE}}' + message
+        print(f"{Fore.YELLOW + BOLD}[SENDING]send a message to {address[0]} : {msg}{ENDC}\n")
+        client.send(message.encode(FORMAT))
 
 
                
                 
-    def receive_data(self,client):
+    def receive_data(self,client,address):
         full_message = ''
         new_msg = True
         while True:
-            msg = client.recv(16)
-            if new_msg:
-                msg_length = int(msg[:self.HEADER])
-                new_msg = False
-            full_message += msg.decode(self.FORMAT)
             
-            if len(full_message) - self.HEADER == msg_length:
-                print(f"{bcolors.OKGREEN + bcolors.BOLD}[RECEIVED] received message from {self.address}:{full_message[self.HEADER:]}{bcolors.ENDC}\n")
+            msg = client.recv(64)
+            if new_msg:
+                msg_length = int(msg[:HEADERSIZE])
+                new_msg = False
+            full_message += msg.decode(FORMAT)
+            
+            if len(full_message) - HEADERSIZE == msg_length:
+                print(f"{Fore.GREEN + BOLD}[RECEIVED] received message from {address[0]}:{full_message[HEADERSIZE:]}{ENDC}\n")
                 new_msg = True
-                message = full_message[self.HEADER:]
+                message = full_message[HEADERSIZE:]
                 full_message = ''
                 return message
                 
         
 
 Server = server("",4041)
-Server.start()
+Server.Start()
