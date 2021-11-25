@@ -169,7 +169,7 @@ class client(object):
 
             Returns:
             None
-
+                                                        
         """
         message2 = str(message)
         message2 = f'{len(message2):<{HEADERSIZE}}' + message2
