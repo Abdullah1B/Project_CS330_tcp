@@ -3,6 +3,7 @@ from cryptography.fernet import Fernet
 from colorama import init , Fore
 import threading
 init(convert=True)
+
 FORMAT = "utf-8"
 HEADERSIZE = 64
 key = "f4Uo9jGxFpMMXokg0Bap6zV-3RgGlz9CPEmtsY72D6c="
@@ -20,7 +21,7 @@ class server(object):
     
     def handle_client(self,client,address):
         """
-            handle exchange message between client and server 
+            handle connection in which client exchange message with server 
 
 
             Parameters:
@@ -148,7 +149,7 @@ class server(object):
 
             Returns:
             message (String) : return the received message form client
-                s
+                
         """
         full_message = ''
         new_msg = True

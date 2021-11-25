@@ -1,6 +1,6 @@
 import socket
 from cryptography.fernet import Fernet
-from colorama import init ,Fore 
+from colorama import init, Fore
 import os
 
 init(convert=True)
@@ -13,31 +13,38 @@ ENDC = '\033[0m'
 BOLD = '\033[1m'
 
 
-
-
-
 class client(object):
     def __init__(self, HostIP, port):
         self.HOST_IP = HostIP
         self.PORT = port
 
     def start(self):
+        """
+
+            connect client socket to server socket and show the option menu to make client choice the MODE to send message
+
+            Parameters:
+            None
+
+            Returns:
+            None
+        """
         self.clinet_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             self.clinet_socket.connect((self.HOST_IP, self.PORT))
         except ConnectionRefusedError:
             print(f"{Fore.RED + BOLD}The server is currently not working{ENDC}")
             exit()
-            
+
         connection = True
-        input_key = self.client_muen()
+        input_key = self.client_menu()
         while connection:
 
             if input_key == 1:
                 message = input("Enter the message: ")
                 self.send_data(message)
                 self.receive_data()
-                input_key = self.client_muen()
+                input_key = self.client_menu()
                 self.clear()
 
             elif input_key == 2:
@@ -50,7 +57,7 @@ class client(object):
                 print(
                     f"Decrypted message:{Fore.GREEN + BOLD} {encrypted_msg[1]}{ENDC}\n")
 
-                input_key = self.client_muen()
+                input_key = self.client_menu()
                 self.clear()
 
             elif input_key == 3:
@@ -61,11 +68,20 @@ class client(object):
 
             else:
                 print("ENTER NUMBER BETWEEN 1-3 ...... ")
-                input_key = self.client_muen()
+                input_key = self.client_menu()
                 self.clear()
 
-
     def receive_encrypted_msg(self):
+        """
+            Receiving Encrypted message and decrypt the message 
+
+            Parameters:
+            None
+
+            Returns:
+            list: return a list contains on Encrypted message and decrypted message 
+
+        """
         encrypted_msg = self.receive_data()
         decrypted_msg = SECRET_KEY.decrypt(
             bytes(encrypted_msg[2:len(encrypted_msg)], FORMAT)).decode()
@@ -75,7 +91,17 @@ class client(object):
         encrypted_msg = SECRET_KEY.encrypt(msg.encode(FORMAT))
         self.send_data(encrypted_msg)
 
-    def client_muen(self):
+    def client_menu(self):
+        """
+            Display option menu to client in order to chocie MODE to send message and send it to the server  
+
+            Parameters:
+            None
+
+            Returns:
+            int : retrun the choice of client  
+
+        """
         IN = input(
             "Choice one of option:\n1-Open mode\n2-Secure mode\n3-Quit application\nEnter: ")
         if(IN == "1"):
@@ -89,12 +115,33 @@ class client(object):
         return int(IN)
 
     def clear(self):
+        """
+            it clear the Terminal
+
+            Parameters:
+            None
+
+            Returns:
+            None
+
+        """
         if os.name == 'nt':
             os.system('cls')
         else:
             os.system('clear')
 
     def receive_data(self):
+        """
+
+            receiving message from server to the client and buffering the received data in proper way
+
+            Parameters:
+            None
+
+            Returns:
+            message (String) : return the received message form Server
+
+        """
         full_message = ''
         new_msg = True
         while True:
@@ -113,14 +160,24 @@ class client(object):
                 full_message = ''
                 return message
 
-    def send_data(self, message2):
-        message = str(message2)
-        message = f'{len(message):<{HEADERSIZE}}' + message
+    def send_data(self, message):
+        """
+            Sending message from Clirnt to the Server  
+
+            Parameters:
+            message (String)    :  the message that want to send to the client  
+
+            Returns:
+            None
+
+        """
+        message2 = str(message)
+        message2 = f'{len(message2):<{HEADERSIZE}}' + message2
         print(
-            f"{Fore.YELLOW + BOLD}Send to server: {message2}{ENDC}\n")
-        self.clinet_socket.send(message.encode(FORMAT))
+            f"{Fore.YELLOW + BOLD}Send to server: {message}{ENDC}\n")
+        self.clinet_socket.send(message2.encode(FORMAT))
 
 
 if __name__ == "__main__":
-    Client = client("192.168.1.9", 4041)
+    Client = client("192.168.1.8", 4041)
     Client.start()
