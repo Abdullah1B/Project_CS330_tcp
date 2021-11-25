@@ -22,7 +22,7 @@ class server(object):
     def handle_client(self,client,address):
         """
             handle connection in which client exchange message with server 
-                    
+                    ddd
 
             Parameters:
             client (Socket) :  the client socket which used to send and receive data

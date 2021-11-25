@@ -166,7 +166,7 @@ class client(object):
 
             Parameters:
             message (String)    :  the message that want to send to the client  
-       
+       ddd
             Returns:
             None     
 
