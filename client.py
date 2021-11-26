@@ -7,7 +7,7 @@ init(convert=True)
 
 FORMAT = "utf-8"
 HEADERSIZE = 64
-key = "f4Uo9jGxFpMMXokg0Bap6zV-3RgGlz9CPEmtsY72D6c="
+key = "f4Uo9jGxFpMMXokg0Bap6zV-3RgGlz9CPEmtsY72D6c=" # shread key to encrypt and decrypt
 SECRET_KEY = Fernet(key)
 ENDC = '\033[0m'
 BOLD = '\033[1m'
@@ -29,44 +29,44 @@ class client(object):
             Returns:
             None
         """
-        self.clinet_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.clinet_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # create socket and defind the family and type of socket 
         try:
-            self.clinet_socket.connect((self.HOST_IP, self.PORT))
-        except ConnectionRefusedError:
+            self.clinet_socket.connect((self.HOST_IP, self.PORT)) # connet to the srver by IP address and port number
+        except ConnectionRefusedError: # handle if the server is down and print fail message
             print(f"{Fore.RED + BOLD}The server is currently not working{ENDC}")
             exit()
 
         connection = True
-        input_key = self.client_menu()
+        input_key = self.client_menu() # display of option menu 
         while connection:
 
-            if input_key == 1:
+            if input_key == 1:# send in Open Mode
                 message = input("Enter the message: ")
                 self.send_data(message)
                 self.receive_data()
                 input_key = self.client_menu()
                 self.clear()
 
-            elif input_key == 2:
+            elif input_key == 2: # send in Secure mode
 
                 message = input("Enter the message: ")
-                self.send_encrypted_msg(message)
-                encrypted_msg = self.receive_encrypted_msg()
+                self.send_encrypted_msg(message) # send an encrypted message to the server
+                encrypted_msg = self.receive_encrypted_msg() # receive an encrypted message
                 print(
                     f"encrypted message:{Fore.LIGHTRED_EX + BOLD} {encrypted_msg[0]}{ENDC}\n")
                 print(
                     f"Decrypted message:{Fore.GREEN + BOLD} {encrypted_msg[1]}{ENDC}\n")
 
                 input_key = self.client_menu()
-                self.clear()
+                self.clear() # clear the terminal
 
-            elif input_key == 3:
+            elif input_key == 3: # Quit form application  
                 print("")
                 self.send_data("Disconnecting....")
                 self.receive_data()
                 connection = False
 
-            else:
+            else: # in case the clinet enter wrong option in menu
                 print("ENTER NUMBER BETWEEN 1-3 ...... ")
                 input_key = self.client_menu()
                 self.clear()
@@ -82,12 +82,22 @@ class client(object):
             list: return a list contains on Encrypted message and decrypted message 
 
         """
-        encrypted_msg = self.receive_data()
+        encrypted_msg = self.receive_data() # receive the message 
         decrypted_msg = SECRET_KEY.decrypt(
-            bytes(encrypted_msg[2:len(encrypted_msg)], FORMAT)).decode()
+            bytes(encrypted_msg[2:len(encrypted_msg)], FORMAT)).decode()# decrypt the message the convert it from byte to string 
         return (encrypted_msg, decrypted_msg)
 
     def send_encrypted_msg(self, msg: str):
+        """
+           Sending Encrypted message to the server  
+
+            Parameters:
+            msg (String)    :  the message that want to send to the client  
+
+            Returns:
+            None
+
+        """
         encrypted_msg = SECRET_KEY.encrypt(msg.encode(FORMAT))
         self.send_data(encrypted_msg)
 
@@ -146,13 +156,13 @@ class client(object):
         new_msg = True
         while True:
 
-            msg = self.clinet_socket.recv(64)
-            if new_msg:
-                msg_length = int(msg[:HEADERSIZE])
+            msg = self.clinet_socket.recv(64)  # receive message up to 64 bytes
+            if new_msg: # if it a new message then 
+                msg_length = int(msg[:HEADERSIZE]) # message lenght up to HEADERSIZE
                 new_msg = False
-            full_message += msg.decode(FORMAT)
+            full_message += msg.decode(FORMAT)# convet the received part of the message from byte to string
 
-            if len(full_message) - HEADERSIZE == msg_length:
+            if len(full_message) - HEADERSIZE == msg_length: # if the length of Full message - HEADERSIZE == message length then we received the whole message 
                 print(
                     f"{Fore.GREEN + BOLD}Received message from server: {full_message[HEADERSIZE:]}{ENDC}\n")
                 new_msg = True
@@ -165,19 +175,19 @@ class client(object):
             Sending message from Clirnt to the Server  
 
             Parameters:
-            message (String)    :  the message that want to send to the client  
+            message (String) :  the message that want to send to the client  
        
             Returns:
             None     
 
         """
         message2 = str(message)
-        message2 = f'{len(message2):<{HEADERSIZE}}' + message2
+        message2 = f'{len(message2):<{HEADERSIZE}}' + message2 # add the HEADERSIZE to the message
         print(
             f"{Fore.YELLOW + BOLD}Send to server: {message}{ENDC}\n")
-        self.clinet_socket.send(message2.encode(FORMAT))
+        self.clinet_socket.send(message2.encode(FORMAT)) # send to srever 
 
 
 if __name__ == "__main__":
-    Client = client("192.168.1.9", 4041)
+    Client = client("192.168.1.8", 4041)
     Client.start()
