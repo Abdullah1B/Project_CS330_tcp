@@ -12,7 +12,7 @@ SECRET_KEY = Fernet(key)
 ENDC = '\033[0m'
 BOLD = '\033[1m'
 
-
+sssssss
 class client(object):
     def __init__(self, HostIP, port):
         self.HOST_IP = HostIP
