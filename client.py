@@ -1,7 +1,7 @@
 import socket
 from cryptography.fernet import Fernet
 from colorama import init, Fore
-import os
+
 
 init(convert=True)
 
@@ -44,7 +44,6 @@ class client(object):
                 self.send_data(message)
                 self.receive_data()
                 input_key = self.client_menu()
-                self.clear()
 
             elif input_key == 2: # send in Secure mode
 
@@ -57,7 +56,6 @@ class client(object):
                     f"Decrypted message:{Fore.GREEN + BOLD} {encrypted_msg[1]}{ENDC}\n")
 
                 input_key = self.client_menu()
-                self.clear() # clear the terminal
 
             elif input_key == 3: # Quit form application  
                 print("")
@@ -68,7 +66,6 @@ class client(object):
             else: # in case the clinet enter wrong option in menu
                 print("ENTER NUMBER BETWEEN 1-3 ...... ")
                 input_key = self.client_menu()
-                self.clear()
 
     def receive_encrypted_msg(self):
         """
@@ -83,7 +80,7 @@ class client(object):
         """
         encrypted_msg = self.receive_data() # receive the message 
         decrypted_msg = SECRET_KEY.decrypt(
-            bytes(encrypted_msg[2:len(encrypted_msg)], FORMAT)).decode()# decrypt the message the convert it from byte to string 
+            bytes(encrypted_msg[1:len(encrypted_msg)], FORMAT)).decode()# decrypt the message the convert it from byte to string 
         return (encrypted_msg, decrypted_msg)
 
     def send_encrypted_msg(self, msg: str):
@@ -123,21 +120,7 @@ class client(object):
             return 0
         return int(IN)
 
-    def clear(self):
-        """
-            it clear the Terminal
 
-            Parameters:
-            None
-
-            Returns:
-            None
-
-        """
-        if os.name == 'nt':
-            os.system('cls')
-        else:
-            os.system('clear')
 
     def receive_data(self):
         """

@@ -26,14 +26,14 @@ class server(object):
 
             Parameters:
             client (Socket) :  the client socket which used to send and receive data
-            address (list)  :  the address which have the IP of client and port nubmer
+            address (list)  :  the address which have the IP of client and port number
 
             Returns:
              None
 
         """
         
-        Mode = client.recv(512) # receive the optin mode from client 
+        Mode = client.recv(512) # receive the option mode from client 
         Mode = Mode.decode() # convert from byte to string 
         
         connection = True
@@ -68,7 +68,7 @@ class server(object):
 
             Parameters:
             client (Socket) :  the client socket which used to send and receive data
-            address (list)  :  the address which have the IP of client and port nubmer
+            address (list)  :  the address which have the IP of client and port number
 
             Returns:
             list: return a list contains on Encrypted message and decrypted message 
@@ -86,7 +86,7 @@ class server(object):
 
             Parameters:
             client (Socket) :  the client socket which used to send and receive data
-            address (list)  :  the address which have the IP of client and port nubmer
+            address (list)  :  the address which have the IP of client and port number
             msg (String)    :  the message that want to send to the client  
 
             Returns:
@@ -100,7 +100,7 @@ class server(object):
     def Start(self):
         """
             setup the socket and bind it to IP address and Port Number and start to listening to the client 
-            and setup the threding to hold multiple connection at the same time
+            and setup the threading to hold multiple connection at the same time
 
             Parameters:
             None
