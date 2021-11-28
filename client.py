@@ -24,7 +24,6 @@ class client(object):
 
             Parameters:
             None
-
             Returns:
             None
         """
